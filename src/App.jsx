@@ -67,7 +67,7 @@ function App() {
           className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
         />
       </div>
-      <div className="grid grid-cols-3 gap-10 p-10">
+      <div className=" flex flex-col gap-6 md:grid grid-cols-3 gap-10 p-10">
         {currentPageData.map((item) => (
           <MyCard
             key={item.id}
