@@ -1,53 +1,60 @@
 import React, { useState, useEffect } from "react";
-import "./App.css";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import MyCard from "./components/myCard";
+import RepoDetail from "./components/MyRepoDetail";
 import ReactPaginate from "react-paginate";
-
-const text = "This Project has No Description from the Github repo";
+import ErrorBoundary from "./components/ErrorBoundary";
+import NotFound from "./components/NotFoundPage";
+import "tailwindcss/tailwind.css";
 
 function App() {
   const [repoData, setRepoData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
-  const [searchQuery, setSearchQuery] = useState(""); // State to hold the search query
+  const [searchQuery, setSearchQuery] = useState("");
+  const [error, setError] = useState(null);
   const itemsPerPage = 6;
 
   useEffect(() => {
-    // Fetch repo data about the GitHub user
-    fetch("https://api.github.com/users/prisca-01/repos")
-      .then((res) => res.json())
-      .then(
-        (result) => {
-          console.log(result);
-          setRepoData(result);
-        },
-        (error) => {
-          console.log(error);
+    // Fetch repo names
+    const fetchRepoData = async () => {
+      try {
+        const response = await fetch(
+          "https://api.github.com/users/prisca-01/repos",
+          {
+            headers: {
+              Authorization: "Bearer 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",
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch repository names");
         }
-      );
+        const data = await response.json();
+        setRepoData(data);
+      } catch (error) {
+        setError(error.message);
+      }
+    };
+
+    fetchRepoData();
   }, []);
 
   const handlePageClick = ({ selected }) => {
     setCurrentPage(selected);
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
-  // Function to handle search query change
+  // Handle Search
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
-    setCurrentPage(0); // Reset current page when search query changes
+    setCurrentPage(0);
   };
 
-  // Filter repository data based on search query
-  const filteredRepoData = repoData.filter((item) =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()))
+  // Filter
+  const filteredRepoData = repoData.filter(
+    (item) =>
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.description &&
+        item.description.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const pageCount = Math.ceil(filteredRepoData.length / itemsPerPage);
@@ -55,52 +62,80 @@ function App() {
   const currentPageData = filteredRepoData.slice(offset, offset + itemsPerPage);
 
   return (
-    <div>
-      <p className="text-3xl font-bold text-center p-5">My GitHub Repos </p>
-      <div className="flex justify-center mb-5">
-        {/* Search input field */}
-        <input
-          type="text"
-          placeholder="Search repositories..."
-          value={searchQuery}
-          onChange={handleSearchChange}
-          className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
+    <Router>
+      <Routes>
+        <Route
+          exact
+          path="/"
+          element={
+            <div className="bg-blue-900 text-white min-h-screen py-12 px-4">
+              <p className="text-3xl font-bold text-center mb-8">
+                My GitHub Repos
+              </p>
+              <div className="flex justify-center mb-5">
+                <input
+                  type="text"
+                  placeholder="Search repositories..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-8 text-black"
+                />
+              </div>
+              {error ? (
+                <div className="flex items-center justify-center h-screen">
+                  <div className="text-center">
+                    <p className="text-red-500 text-lg font-bold mb-2">
+                      Something went wrong.
+                    </p>
+                    <p className="text-gray-100">{error}</p>
+                  </div>
+                </div>
+              ) : (
+                <React.Fragment>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {currentPageData.map((item) => (
+                      <MyCard key={item.id} Title={item.name} />
+                    ))}
+                  </div>
+                  <div className="flex justify-center my-10">
+                    <ReactPaginate
+                      previousLabel={"← Previous"}
+                      nextLabel={"Next →"}
+                      breakLabel={"..."}
+                      pageCount={pageCount}
+                      marginPagesDisplayed={2}
+                      pageRangeDisplayed={5}
+                      onPageChange={handlePageClick}
+                      containerClassName={"pagination"}
+                      subContainerClassName={"pages pagination"}
+                      activeClassName={"active"}
+                      pageClassName={"inline-block m-2"}
+                      previousClassName={"inline-block m-2"}
+                      nextClassName={"inline-block m-2"}
+                      breakClassName={"inline-block m-2"}
+                      disabledClassName={"opacity-50 cursor-not-allowed"}
+                      previousLinkClassName={"border px-3 py-1 rounded-lg"}
+                      nextLinkClassName={"border px-3 py-1 rounded-lg"}
+                      breakLinkClassName={"border px-3 py-1 rounded-lg"}
+                      pageLinkClassName={"border px-3 py-1 rounded-lg"}
+                    />
+                  </div>
+                </React.Fragment>
+              )}
+            </div>
+          }
         />
-      </div>
-      <div className=" flex flex-col gap-6 md:grid grid-cols-3 gap-10 p-10">
-        {currentPageData.map((item) => (
-          <MyCard
-            key={item.id}
-            Title={item.name}
-            description={item.description ? null : text}
-            created={formatDate(item.created_at)} // Format the created date
-          />
-        ))}
-      </div>
-      <div className="flex justify-center mb-10 pb-10 border-t pt-4">
-        <ReactPaginate
-          previousLabel={"← Previous"}
-          nextLabel={"Next →"}
-          breakLabel={"..."}
-          pageCount={pageCount}
-          marginPagesDisplayed={2}
-          pageRangeDisplayed={5}
-          onPageChange={handlePageClick}
-          containerClassName={"pagination"}
-          subContainerClassName={"pages pagination"}
-          activeClassName={"active"}
-          pageClassName={"inline-block m-2"}
-          previousClassName={"inline-block m-2"}
-          nextClassName={"inline-block m-2"}
-          breakClassName={"inline-block m-2"}
-          disabledClassName={"opacity-50 cursor-not-allowed"}
-          previousLinkClassName={"border px-3 py-1 rounded-lg"}
-          nextLinkClassName={"border px-3 py-1 rounded-lg"}
-          breakLinkClassName={"border px-3 py-1 rounded-lg"}
-          pageLinkClassName={"border px-3 py-1 rounded-lg"}
+        <Route
+          path="/repo/:repoName"
+          element={
+            <ErrorBoundary>
+              <RepoDetail />
+            </ErrorBoundary>
+          }
         />
-      </div>
-    </div>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
   );
 }
 

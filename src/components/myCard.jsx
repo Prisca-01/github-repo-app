@@ -1,49 +1,25 @@
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-  } from "@/components/ui/card";
-  import { useState, useEffect } from "react";
-  
-  const MyCard = ({Title, description, created}) => {
-    // const [repoData, setRepoData] = useState([]);
-    // useEffect(() => {
-    //   // Fetch repo data about the GitHub user
-    //   fetch("https://api.github.com/users/prisca-01/repos")
-    //     .then((res) => res.json())
-    //     .then(
-    //       (result) => {
-    //         console.log(result);
-    //         setRepoData(result);
-    //       },
-    //       (error) => {
-    //         console.log(error);
-    //       }
-    //     );
-    // }, []);
-  
-    return (
-      <div>
-        
-          <Card  className="col-span-1">
-            <CardHeader>
-              <CardTitle> {Title}</CardTitle>
-              <CardDescription>{description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p> created: {created} </p>
-            </CardContent>
-            <CardFooter>
-              <p>Card Footer</p>
-            </CardFooter>
-          </Card>
-      
-      </div>
-    );
-  };
-  
-  export default MyCard;
-  
+import { Link } from "react-router-dom";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import 'tailwindcss/tailwind.css';
+
+
+const MyCard = ({ Title }) => {
+  return (
+    <div className="col-span-1 w-full h-full">
+      <Card className="w-full h-full">
+        <CardHeader>
+          <CardTitle>
+            <Link
+              to={`/repo/${Title}`}
+              className="block w-full h-full p-4 bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out"
+            >
+              {Title}
+            </Link>
+          </CardTitle>
+        </CardHeader>
+      </Card>
+    </div>
+  );
+};
+
+export default MyCard;
