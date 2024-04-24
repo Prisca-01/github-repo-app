@@ -22,7 +22,7 @@ function App() {
           "https://api.github.com/users/prisca-01/repos",
           {
             headers: {
-              Authorization: "",
+              Authorization: "Bearer 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",
             },
           }
         );
