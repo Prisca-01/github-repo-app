@@ -18,14 +18,7 @@ function App() {
     // Fetch repo names
     const fetchRepoData = async () => {
       try {
-        const response = await fetch(
-          "https://api.github.com/users/prisca-01/repos",
-          {
-            headers: {
-              Authorization: "Bearer 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",
-            },
-          }
-        );
+        const response = await fetch("https://api.github.com/users/prisca-01/repos");
         if (!response.ok) {
           throw new Error("Failed to fetch repository names");
         }
@@ -35,10 +28,10 @@ function App() {
         setError(error.message);
       }
     };
-
+  
     fetchRepoData();
   }, []);
-
+  
   const handlePageClick = ({ selected }) => {
     setCurrentPage(selected);
   };
